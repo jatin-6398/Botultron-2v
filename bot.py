@@ -1,39 +1,18 @@
-
 import os
-from flask import Flask, request
-from telegram import Bot, Update
-from telegram.ext import Dispatcher, MessageHandler, Filters
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Environment variable se token lo
-TOKEN = os.environ.get('TELEGRAM_TOKEN')
-if not TOKEN:
-    raise RuntimeError("TELEGRAM_TOKEN environment variable not set")
+BOT_TOKEN = os.environ['TELEGRAM_TOKEN']
 
-bot = Bot(token=TOKEN)
-app = Flask(__name__)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hello dost! Main live hoon 😊")
 
-# Dispatcher setup (py-telegram-bot style)
-dispatcher = Dispatcher(bot, None, use_context=True)
-
-# Message handler
-def echo(update, context):
-    text = update.message.text
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"Received: {text}")
-
-dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-
-# Webhook endpoint
-@app.route('/', methods=['POST'])
-def webhook():
-    update = Update.de_json(request.get_json(force=True), bot)
-    dispatcher.process_update(update)
-    return 'OK'
-
-# Health check (optional)
-@app.route('/ping', methods=['GET'])
-def ping():
-    return 'pong', 200
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(update.message.text)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler('start', start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    port = int(os.environ.get('PORT', 8443))
+    app.run_polling()
