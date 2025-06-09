@@ -1,7 +1,9 @@
+
 services:
-  - type: web            # web service
-    name: telegram-bot   # service ka naam
-    env: python          # Python environment
-    plan: free           # free tier
+  - type: web
+    name: ultron-bot
+    env: python
+    region: frankfurt  # India ke liye closest free region
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python bot.py
+    startCommand: gunicorn bot:app --workers 1 --bind 0.0.0.0:$PORT
