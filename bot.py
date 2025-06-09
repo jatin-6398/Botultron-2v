@@ -1,26 +1,19 @@
-import telebot
 from flask import Flask, request
+import telegram, os
 
-TOKEN = "8070069668:AAHD6Yr5DpiK7vxYsAxKmLAd1xKKZ7irRK8"
-bot = telebot.TeleBot(TOKEN)
+TOKEN = os.environ['TELEGRAM_TOKEN']
+bot = telegram.Bot(TOKEN)
 app = Flask(__name__)
 
-@bot.message_handler(func=lambda message: True)
-def echo_message(message):
-    bot.reply_to(message, "🤖 Botultron active hai! Tumne likha: " + message.text)
-
-@app.route("/" + TOKEN, methods=["POST"])
-def getMessage():
-    json_str = request.stream.read().decode("UTF-8")
-    update = telebot.types.Update.de_json(json_str)
-    bot.process_new_updates([update])
-    return "!", 200
-
-@app.route("/")
+@app.route('/', methods=['POST'])
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url="https://botultron.onrender.com/" + TOKEN)
-    return "Webhook set!", 200
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    if update.message and update.message.text:
+        chat_id = update.message.chat.id
+        text = update.message.text
+        bot.send_message(chat_id=chat_id, text=f"Received: {text}")
+    return 'OK'
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
