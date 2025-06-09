@@ -1,8 +1,7 @@
-
 services:
-  - type: web
-    name: telegram-bot
-    env: python
-    plan: free
+  - type: web            # web service
+    name: telegram-bot   # service ka naam
+    env: python          # Python environment
+    plan: free           # free tier
     buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
