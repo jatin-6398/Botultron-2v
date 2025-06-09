@@ -1,8 +1,8 @@
+
 services:
   - type: web
-    name: botultron
+    name: telegram-bot
     env: python
     plan: free
-    buildCommand: ""
-    startCommand: "python bot.py"
-    repo: https://github.com/yourusername/Botultron
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
